@@ -1,10 +1,10 @@
-import { Html, Main, NextScript } from "next/document";
-import Head from "next/head";
+// pages/_document.js
+import { Html, Head, Main, NextScript } from "next/document"; // Importação correta
 import { getCssText } from "../styles";
 
 export default function Document() {
   return (
-    <Html>
+    <Html lang="pt-BR">
       <Head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -16,13 +16,11 @@ export default function Document() {
           href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
           rel="stylesheet"
         />
-
         <style
           id="stitches"
           dangerouslySetInnerHTML={{ __html: getCssText() }}
         />
       </Head>
-
       <body>
         <Main />
         <NextScript />
