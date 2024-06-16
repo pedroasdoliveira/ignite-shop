@@ -1,5 +1,6 @@
-import Head from 'next/head'
-import Image from 'next/image'
+import Head from "next/head";
+import Image from "next/image";
+import { title } from "node:process";
 
 export default function Home() {
   return (
@@ -12,5 +13,5 @@ export default function Home() {
 
       <h1>Hello world</h1>
     </div>
-  )
+  );
 }
