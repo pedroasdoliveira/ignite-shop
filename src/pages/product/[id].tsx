@@ -1,5 +1,9 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import { useState } from "react";
 import Stripe from "stripe";
 
 import { stripe } from "../../lib/stripe";
@@ -8,7 +12,6 @@ import {
   ProductContainer,
   ProductDetails,
 } from "../../styles/pages/product";
-import { useRouter } from "next/router";
 
 interface ProductProps {
   product: {
@@ -17,7 +20,12 @@ interface ProductProps {
     imageUrl: string;
     price: string;
     description: string;
+    defaultPriceId: string;
   };
+}
+
+interface IAxiosResponse {
+  checkoutUrl: string;
 }
 
 const Product = ({ product }: ProductProps) => {
@@ -30,6 +38,28 @@ const Product = ({ product }: ProductProps) => {
       </div>
     );
   }
+
+  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
+    useState<boolean>(false);
+
+  const handleBuyProduct = async () => {
+    try {
+      setIsCreatingCheckoutSession(true);
+
+      const response = await axios.post<IAxiosResponse>("/api/checkout", {
+        priceId: product.defaultPriceId,
+      });
+
+      const { checkoutUrl } = response.data;
+
+      window.location.href = checkoutUrl;
+    } catch (error) {
+      // Conectar com uma ferramenta de observabilidade (Datadog / Sentry)
+      setIsCreatingCheckoutSession(false);
+
+      alert("Falha ao redirecionar ao checkout!");
+    }
+  };
 
   return (
     <ProductContainer>
@@ -44,7 +74,9 @@ const Product = ({ product }: ProductProps) => {
 
         <p>{product.description}</p>
 
-        <button>Comprar agora</button>
+        <button disabled={isCreatingCheckoutSession} onClick={handleBuyProduct}>
+          Comprar agora
+        </button>
       </ProductDetails>
     </ProductContainer>
   );
@@ -82,6 +114,7 @@ export const getStaticProps: GetStaticProps<
           currency: "BRL",
         }).format(price.unit_amount / 100),
         description: product.description,
+        defaultPriceId: price.id,
       },
     },
     revalidate: 60 * 60 * 2, // 2 horas
